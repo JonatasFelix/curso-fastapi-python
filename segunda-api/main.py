@@ -41,12 +41,12 @@ async def get_cursos(): # FUNÇÃO QUE RETORNA TODOS OS CURSOS
 @app.get("/cursos/{id}")                                # ROTA PARA LISTAR UM CURSO ESPECÍFICO PELO ID
 async def get_curso(id: int):                           # FUNÇÃO QUE RETORNA UM CURSO ESPECÍFICO PELO ID
     try:                                                # TENTA EXECUTAR O CÓDIGO
-        cursos[id].update({"id": id})                   # ATUALIZA O DICIONÁRIO COM O ID DO CURSO
-        return cursos[id]                               # RETORNA O CURSO ESPECÍFICO PELO ID
+        curso = cursos[id]                                  # ATUALIZA O DICIONÁRIO COM O ID
+        return curso                                        # RETORNA O CURSO ESPECÍFICO PELO ID
     except:                                             # CASO NÃO ENCONTRE O ID DO CURSO
-        raise HTTPException(                            # LANÇA UMA EXCEÇÃO 
-            status_code=status.HTTP_404_NOT_FOUND,      # STATUS CODE 404  NOT FOUND
-            detail=f"Curso com id {id} não encontrado"  # DETALHES DA EXCEÇÃO - MENSAGEM
+        raise HTTPException(                                # LANÇA UMA EXCEÇÃO 
+            status_code=status.HTTP_404_NOT_FOUND,          # STATUS CODE 404  NOT FOUND
+            detail=f"Curso com id {id} não encontrado"      # DETALHES DA EXCEÇÃO - MENSAGEM
         )
 
 @app.post("/cursos", status_code=status.HTTP_201_CREATED)   # ROTA PARA CRIAR UM CURSO - STATUS CODE 201 CREATED
@@ -55,7 +55,30 @@ async def post_curso(curso: Curso):                         # FUNÇÃO QUE CRIA 
     del curso.id                                            # DELETA O ID DO CURSO - NÃO É NECESSÁRIO POIS O ID É GERADO AUTOMATICAMENTE
     cursos[id] = curso                                      # ADICIONA O CURSO AO DICIONÁRIO
     return cursos[id]                                       # RETORNA O CURSO CRIADO
-   
+
+@app.put("/cursos/{id}", status_code=status.HTTP_202_ACCEPTED)  # ROTA PARA ATUALIZAR UM CURSO - STATUS CODE 202 ACCEPTED
+async def put_curso(id: int, curso: Curso):                     # FUNÇÃO QUE ATUALIZA UM CURSO
+    if id in cursos:                                            # SE O CURSO EXISTIR
+        del curso.id                                                # DELETA O ID DO CURSO - NÃO É NECESSÁRIO JÁ POSSUIMOS O ID
+        cursos[id] = curso                                          # ATUALIZA O CURSO
+        return cursos[id]                                           # RETORNA O CURSO ATUALIZADO
+    else:                                                       # CASO O CURSO NÃO EXISTA
+        raise HTTPException(                                        # LANÇA UMA EXCEÇÃO
+            status_code=status.HTTP_404_NOT_FOUND,                  # STATUS CODE 404 NOT FOUND
+            detail=f"Curso com id {id} não encontrado"              # DETALHES DA EXCEÇÃO - MENSAGEM
+        )
+
+@app.delete("/cursos/{id}", status_code=status.HTTP_200_OK)                 # ROTA PARA DELETAR UM CURSO - STATUS CODE 204 NO CONTENT
+async def delete_curso(id: int):                                            # FUNÇÃO QUE DELETA UM CURSO
+    try:                                                                    # TENTA EXECUTAR O CÓDIGO
+        del cursos[id]                                                          # DELETA O CURSO PELO ID
+        return {"mensagem": f"Curso com id {id} deletado com sucesso"}          # RETORNA A MENSAGEM DE SUCESSO
+    except:                                                                 # CASO NÃO ENCONTRE O ID DO CURSO
+        raise HTTPException(                                                    # LANÇA UMA EXCEÇÃO
+            status_code=status.HTTP_404_NOT_FOUND,                              # STATUS CODE 404  NOT FOUND
+            detail=f"Curso com id {id} não encontrado"                          # DETALHES DA EXCEÇÃO - MENSAGEM
+        )
+
 
 if __name__ == "__main__":  # SE O ARQUIVO FOR EXECUTADO DIRETAMENTE, EXECUTA O SERVIDOR - python main.py
     import uvicorn
