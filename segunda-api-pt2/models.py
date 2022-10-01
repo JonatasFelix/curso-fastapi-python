@@ -21,7 +21,7 @@ class Curso(BaseModel):  # CLASSE QUE REPRESENTA UM CURSO EXTENDENDO A CLASSE Ba
 
     @validator('aulas')  # VALIDATOR PARA AS AULAS
     def aulas_maior_que_0(cls, value):  # FUNÇÃO QUE VALIDA SE O NÚMERO DE AULAS É MAIOR QUE 0
-        if value < 1:                  # SE O NÚMERO DE AULAS FOR MENOR QUE 1
+        if value < 12:                  # SE O NÚMERO DE AULAS FOR MENOR QUE 1
             raise ValueError('O número de aulas precisa ser maior que 0')  # RETORNA UMA MENSAGEM DE ERRO
         
         if type(value) != int:         # SE O NÚMERO DE AULAS NÃO FOR UM INTEIRO
@@ -31,7 +31,7 @@ class Curso(BaseModel):  # CLASSE QUE REPRESENTA UM CURSO EXTENDENDO A CLASSE Ba
 
     @validator('horas')  # VALIDATOR PARA AS HORAS
     def horas_maior_que_0(cls, value):  # FUNÇÃO QUE VALIDA SE O NÚMERO DE HORAS É MAIOR QUE 0
-        if value < 1:                  # SE O NÚMERO DE HORAS FOR MENOR QUE 1
+        if value < 10:                   # SE O NÚMERO DE HORAS FOR MENOR QUE 1
             raise ValueError('O número de horas precisa ser maior que 0')  # RETORNA UMA MENSAGEM DE ERRO
 
         if type(value) != int:         # SE O NÚMERO DE HORAS NÃO FOR UM INTEIRO
