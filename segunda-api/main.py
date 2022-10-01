@@ -1,17 +1,19 @@
 from fastapi import FastAPI 
-from fastapi import HTTPException           # CRIAR EXCEÇÕES
-from fastapi import status                  # CRIAR STATUS CODES PARA AS EXCEÇÕES
-from fastapi import Response                # CRIAR RESPOSTAS
-from fastapi import Path                    # CRIAR PATHS - /{id}
-from fastapi import Query                   # CRIAR QUERYS - /?id=1
-from fastapi import Header                  # CRIAR HEADERS - GERALMENTE USADO PARA AUTENTICAÇÃO
-from fastapi import Depends                 # CRIAR DEPENDENCIAS
+from fastapi import HTTPException                               # CRIAR EXCEÇÕES
+from fastapi import status                                      # CRIAR STATUS CODES PARA AS EXCEÇÕES
+from fastapi import Response                                    # CRIAR RESPOSTAS
+from fastapi import Body                                        # CRIAR CORPO DA REQUISIÇÃO
+from fastapi import Path                                        # CRIAR PATHS - /{id}
+from fastapi import Query                                       # CRIAR QUERYS - /?id=1
+from fastapi import Header                                      # CRIAR HEADERS - GERALMENTE USADO PARA AUTENTICAÇÃO
+from fastapi import Depends                                     # CRIAR DEPENDENCIAS
 
-from time import sleep                      # IMPORTAR FUNÇÃO SLEEP
+from time import sleep                                          # IMPORTAR FUNÇÃO SLEEP
 
-from typing import Optional, Any                 # CRIAR TIPOS DE DADOS
+from typing import Optional, Any, Dict, List                    # CRIAR TIPOS DE DADOS
 
-from models import Curso
+from models import Curso                                        # IMPORTAR MODELO DE CURSO
+from models import cursos                                       # IMPORTAR LISTA DE CURSOS
 
 
 def fake_db():
@@ -23,25 +25,13 @@ def fake_db():
     finally:
         print("Desconectando do banco de dados")
 
-app = FastAPI() # ESTANCIANDO A CLASSE FastAPI
+app = FastAPI(
+    title="API de Cursos",                              # TITULO DA API - APARECE NA DOCUMENTAÇÃO
+    description="CURSO GEEK UNIVERSITY - FASTAPI",      # DESCRIÇÃO DA API - APARECE NA DOCUMENTAÇÃO
+    version="0.0.1"                                     # VERSÃO DA API - APARECE NA DOCUMENTAÇÃO
 
-cursos = { # DICIONÁRIO DE CURSOS (OBJETOS DO JS)
-    1: {
-        "titulo": "Curso de Python",
-        "aulas": 10,
-        "horas": 20
-    },
-    2: {
-        "titulo": "Curso de FastAPI",
-        "aulas": 10,
-        "horas": 20
-    },
-    3: {
-        "titulo": "Curso de Docker",
-        "aulas": 10,
-        "horas": 20
-    }
-}
+
+) # ESTANCIANDO A CLASSE FastAPI
 
 ### FAST API TEM TIPAGEM DA MESMA FORMA QUE O TYPESCRIPT
 
@@ -53,23 +43,39 @@ cursos = { # DICIONÁRIO DE CURSOS (OBJETOS DO JS)
 ###     array x list
 
 
-@app.get("/cursos")             # ROTA PARA LISTAR TODOS OS CURSOS
-async def get_cursos(           # FUNÇÃO QUE RETORNA TODOS OS CURSOS
-        db: any = Depends(fake_db)  # INJETANDO DEPENDENCIA DA FUNÇÃO fake_db
+@app.get("/cursos",                             # ROTA PARA LISTAR TODOS OS CURSOS
+    summary="Listar todos os cursos",           # TITULO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    description="Listar todos os cursos",       # DESCRIÇÃO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    response_description="Lista de cursos",     # DESCRIÇÃO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO - NA PARTE DO STATUS CODE
+    response_model=List[Curso],                 # MODELO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    status_code=status.HTTP_200_OK,              # STATUS CODE DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    tags=["Cursos"]                             # TAGS DA ROTA - APARECE NA DOCUMENTAÇÃO
+)             
+async def get_cursos(                           # FUNÇÃO QUE RETORNA TODOS OS CURSOS
+        db: any = Depends(fake_db)              # INJETANDO DEPENDENCIA DA FUNÇÃO fake_db
     ): 
-    return cursos       # RETORNA TODOS OS CURSOS
+    return cursos                               # RETORNA TODOS OS CURSOS
 
-@app.get("/cursos/{id}")                                        # ROTA PARA LISTAR UM CURSO ESPECÍFICO PELO ID
-async def get_curso(id: int = Path (                            # FUNÇÃO QUE RETORNA UM CURSO ESPECÍFICO PELO ID
-        default=None,                                           # VALOR PADRÃO DO ID - CASO NÃO SEJA PASSADO NENHUM ID                                  
-        title="O ID do curso",                                  # TÍTULO DO PARÂMETRO
-        description="Deve ser um numero inteiro maior que 0",   # DESCRIÇÃO DE COMO DEVE SER O ID
-        gt=0                                                    # MAIOR QUE 0
+@app.get("/cursos/{id}",                                        # ROTA PARA LISTAR UM CURSO ESPECÍFICO PELO ID
+    summary="Listar um curso específico",                       # TITULO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    description="Listar um curso específico",                   # DESCRIÇÃO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    response_description="Curso específico",                    # DESCRIÇÃO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO - NA PARTE DO STATUS CODE
+    response_model=Curso,                                       # MODELO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    status_code=status.HTTP_200_OK,                             # STATUS CODE DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    tags=["Cursos"]                                             # TAGS DA ROTA - APARECE NA DOCUMENTAÇÃO
+)                                       
+async def get_curso(                                            # FUNÇÃO QUE RETORNA UM CURSO ESPECÍFICO PELO ID
+    id: int = Path (                                            # ID DO CURSO - PATH PARAMETER
+        default=None,                                               # VALOR PADRÃO DO ID - CASO NÃO SEJA PASSADO NENHUM ID                                  
+        title="O ID do curso",                                      # TÍTULO DO PARÂMETRO
+        description="Deve ser um numero inteiro maior que 0",       # DESCRIÇÃO DE COMO DEVE SER O ID
+        gt=0,                                                       # MAIOR QUE 0
     ),
     db: any = Depends(fake_db)                                  # INJETANDO DEPENDENCIA DA FUNÇÃO fake_db
-):                           
+):  
+    id = id - 1                                         # SUBTRAINDO 1 DO ID PARA QUE O ID SEJA IGUAL AO INDICE DA LISTA                         
     try:                                                # TENTA EXECUTAR O CÓDIGO
-        curso = cursos[id]                                  # ATUALIZA O DICIONÁRIO COM O ID
+        return cursos[id]                               # RETORNA O CURSO COM O ID PASSADO
         return curso                                        # RETORNA O CURSO ESPECÍFICO PELO ID
     except:                                             # CASO NÃO ENCONTRE O ID DO CURSO
         raise HTTPException(                                # LANÇA UMA EXCEÇÃO 
@@ -77,34 +83,74 @@ async def get_curso(id: int = Path (                            # FUNÇÃO QUE R
             detail=f"Curso com id {id} não encontrado"      # DETALHES DA EXCEÇÃO - MENSAGEM
         )
 
-@app.post("/cursos", status_code=status.HTTP_201_CREATED)   # ROTA PARA CRIAR UM CURSO - STATUS CODE 201 CREATED
+@app.post("/cursos",                                        # ROTA PARA CRIAR UM CURSO
+    summary="Criar um curso",                               # TITULO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    description="Criar um curso",                           # DESCRIÇÃO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    response_description="Curso criado",                    # DESCRIÇÃO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    response_model=Curso,                                   # MODELO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    status_code=status.HTTP_201_CREATED,                    # STATUS CODE DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    tags=["Cursos"]                                         # TAGS DA ROTA - APARECE NA DOCUMENTAÇÃO
+    )   
 async def post_curso(curso: Curso,                          # FUNÇÃO QUE CRIA UM CURSO
     db: any = Depends(fake_db)                              # INJETANDO DEPENDENCIA DA FUNÇÃO fake_db
 ):                         
     id = len(cursos) + 1                                    # ID DO CURSO
-    del curso.id                                            # DELETA O ID DO CURSO - NÃO É NECESSÁRIO POIS O ID É GERADO AUTOMATICAMENTE
-    cursos[id] = curso                                      # ADICIONA O CURSO AO DICIONÁRIO
-    return cursos[id]                                       # RETORNA O CURSO CRIADO
+    cursos.append(curso)                                    # ADICIONA O CURSO NA LISTA DE CURSOS
+    return curso                                            # RETORNA O CURSO CRIADO
 
-@app.put("/cursos/{id}", status_code=status.HTTP_202_ACCEPTED)  # ROTA PARA ATUALIZAR UM CURSO - STATUS CODE 202 ACCEPTED
-async def put_curso(id: int, curso: Curso,                       # FUNÇÃO QUE ATUALIZA UM CURSO
-    db: any = Depends(fake_db)                                  # INJETANDO DEPENDENCIA DA FUNÇÃO fake_db
+@app.put("/cursos/{id}",
+    summary="Atualizar um curso específico",                                # TITULO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    description="Atualizar um curso específico",                            # DESCRIÇÃO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    response_description="Curso atualizado",                                # DESCRIÇÃO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    response_model=Curso,                                                   # MODELO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    status_code=status.HTTP_200_OK,                                         # STATUS CODE DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    tags=["Cursos"]                                                         # TAGS DA ROTA - APARECE NA DOCUMENTAÇÃO
+)              
+async def put_curso(                                                        # FUNÇÃO QUE ATUALIZA UM CURSO
+    id: int = Path (                                                        # ID DO CURSO - PATH PARAMETER
+                    default=None,                                           # VALOR PADRÃO DO ID - CASO NÃO SEJA PASSADO NENHUM ID
+                    title="O ID do curso",                                  # TÍTULO DO PARÂMETRO
+                    description="Deve ser um numero inteiro maior que 0",   # DESCRIÇÃO DE COMO DEVE SER O ID
+                    gt=0,                                                   # MAIOR QUE 0
+                    example=1                                               # EXEMPLO DE COMO DEVE SER O ID           
+                    ),
+
+    curso: Curso = Body(                                                # CORPO DA REQUISIÇÃO - BODY PARAMETER
+                    ...,                                
+                       
+        ),       
+
+    db: any = Depends(fake_db)                                          # INJETANDO DEPENDENCIA DA FUNÇÃO fake_db
 ):                    
-
-    if id in cursos:                                            # SE O CURSO EXISTIR
-        del curso.id                                                # DELETA O ID DO CURSO - NÃO É NECESSÁRIO JÁ POSSUIMOS O ID
-        cursos[id] = curso                                          # ATUALIZA O CURSO
-        return cursos[id]                                           # RETORNA O CURSO ATUALIZADO
-    else:                                                       # CASO O CURSO NÃO EXISTA
-        raise HTTPException(                                        # LANÇA UMA EXCEÇÃO
-            status_code=status.HTTP_404_NOT_FOUND,                  # STATUS CODE 404 NOT FOUND
-            detail=f"Curso com id {id} não encontrado"              # DETALHES DA EXCEÇÃO - MENSAGEM
+    try:                                                            # TENTA EXECUTAR O CÓDIGO
+        curso = { **curso.dict(), "id": id }                        # FAZ A COPIA DO CURSO PASSADO E ADICIONA O ID VERDADEIRO
+        cursos[id-1] = curso                                        # ATUALIZA O CURSO COM O ID PASSADO
+        return curso                                                # RETORNA O CURSO ATUALIZADO
+    except:                                                         # CASO NÃO ENCONTRE O ID DO CURSO
+        raise HTTPException(                                            # LANÇA UMA EXCEÇÃO
+            status_code=status.HTTP_404_NOT_FOUND,                      # STATUS CODE 404  NOT FOUND
+            detail=f"Curso com id {id} não encontrado"                  # DETALHES DA EXCEÇÃO - MENSAGEM
         )
 
-@app.delete("/cursos/{id}")                                                 # ROTA PARA DELETAR UM CURSO - STATUS CODE 204 NO CONTENT
-async def delete_curso(id: int,                                             # FUNÇÃO QUE DELETA UM CURSO
+
+@app.delete("/cursos/{id}",
+    summary="Deletar um curso específico",                              # TITULO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    description="Deletar um curso específico",                          # DESCRIÇÃO DA ROTA - APARECE NA DOCUMENTAÇÃO
+    response_description="Curso deletado",                              # DESCRIÇÃO DA RESPOSTA - APARECE NA DOCUMENTAÇÃO
+    status_code=status.HTTP_204_NO_CONTENT,                             # STATUS CODE 204 NO CONTENT
+    tags=["Cursos"]                                                     # TAGS DA ROTA - APARECE NA DOCUMENTAÇÃO
+)                                                 
+async def delete_curso(                                                     # FUNÇÃO QUE DELETA UM CURSO
+    id: int = Path (                                                        # ID DO CURSO - PATH PARAMETER,
+                    default=None,                                           # VALOR PADRÃO DO ID - CASO NÃO SEJA PASSADO NENHUM ID
+                    title="O ID do curso",                                  # TÍTULO DO PARÂMETRO
+                    description="Deve ser um numero inteiro maior que 0",   # DESCRIÇÃO DE COMO DEVE SER O ID
+                    gt=0,                                                   # MAIOR QUE 0
+                    example=1                                               # EXEMPLO DE COMO DEVE SER O ID
+            ),                                                 
     db: any = Depends(fake_db)                                              # INJETANDO DEPENDENCIA DA FUNÇÃO fake_db
-):                                            
+):  
+    id = id - 1                                                             # SUBTRAINDO 1 DO ID PARA QUE O ID SEJA IGUAL AO INDICE DA LISTA                                          
     try:                                                                    # TENTA EXECUTAR O CÓDIGO
         del cursos[id]                                                          # DELETA O CURSO PELO ID
         #return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)            # FORMA QUE DEVERIA SER FEITO - MAS NO FASTAPI ESTÁ BUGADO
@@ -115,7 +161,7 @@ async def delete_curso(id: int,                                             # FU
             detail=f"Curso com id {id} não encontrado"                          # DETALHES DA EXCEÇÃO - MENSAGEM
         )
 
-@app.get("/queryParams", status_code=status.HTTP_200_OK)        # ROTA USANDO QUERY PARAMS - STATUS CODE 200 OK
+@app.get("/queryParams", status_code=status.HTTP_200_OK, tags=["Calculadora"])        # ROTA USANDO QUERY PARAMS - STATUS CODE 200 OK
 async def get_queryParams(
     Authorization: str = Header(default=None,                           # HEADER - AUTENTICAÇÃO
                                 title="Token de autorização",           # TÍTULO DO HEADER
