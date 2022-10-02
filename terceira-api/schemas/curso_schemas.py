@@ -1,0 +1,25 @@
+# UM SCHEMA PARA CADA MODEL
+# SÃO OS SCHEMAS QUE SERÃO UTILIZADOS PARA VALIDAR OS DADOS ENVIADOS PELO USUÁRIO
+
+# JÁ OS MODELS SERÃO UTILIZADOS PARA VALIDAR OS DADOS QUE ESTÃO NO BANCO DE DADOS - 
+#   RESPONSAVEL PELA COMUNICAÇÃO COM O BANCO DE DADOS
+
+from typing import Optional
+from pydantic import BaseModel as SCBaseModel ## SCHEMA BASE MODEL
+
+class CursoBase(SCBaseModel):           ## SCHEMA BASE
+    id: Optional[int]                   ## ID DO CURSO
+    titulo: str                         ## TÍTULO DO CURSO
+    aulas: int                          ## QUANTIDADE DE AULAS
+    horas: int                          ## QUANTIDADE DE HORAS
+
+    class Config:                       ## CONFIGURAÇÕES
+        orm_mode = True                 ## ORM MODE - PARA O PYDANTIC SABER QUE O SCHEMA É BASEADO EM UM MODEL
+
+
+# PODEMOS CRIAR VARIAÇÕES DO SCHEMA BASE
+# POR EXEMPLO, UM SCHEMA PARA CRIAR UM CURSO
+# E OUTRO SCHEMA PARA ATUALIZAR UM CURSO
+# E OUTRO SCHEMA PARA DELETAR UM CURSO
+# E OUTRO SCHEMA PARA LISTAR UM CURSO
+# E OUTRO SCHEMA PARA LISTAR TODOS OS CURSOS
