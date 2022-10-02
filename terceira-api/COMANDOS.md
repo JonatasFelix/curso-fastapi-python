@@ -7,5 +7,5 @@ mysql-connector-python  # Driver de mysql
 asyncmy                 # Driver de mysql async
 python-dotenv           # Ler variaveis de ambiente
 
-pip install mysql-connector-python fastapi sqlalchemy uvicorn aiomysql
+pip install mysql-connector-python fastapi sqlalchemy uvicorn asyncmy
 pip freeze > requirements.txt
