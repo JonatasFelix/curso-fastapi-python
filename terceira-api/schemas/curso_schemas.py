@@ -7,7 +7,7 @@
 from typing import Optional
 from pydantic import BaseModel as SCBaseModel ## SCHEMA BASE MODEL
 
-class CursoBase(SCBaseModel):           ## SCHEMA BASE
+class CursoSchema(SCBaseModel):         ## SCHEMA BASE
     id: Optional[int]                   ## ID DO CURSO
     titulo: str                         ## TÍTULO DO CURSO
     aulas: int                          ## QUANTIDADE DE AULAS

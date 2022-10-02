@@ -9,10 +9,7 @@ async def criar_tabelas() -> None:                                         # Fun
                 await conn.run_sync(settings.DBBaseModel.metadata.drop_all)     # Deleta todas as tabelas
                 await conn.run_sync(settings.DBBaseModel.metadata.create_all)   # Cria todas as tabelas
                 print('Tabela criada com sucesso!')                             # Imprime na tela
-                await conn.close()                                              # Fecha a conexão
-                
 
-                
 
 #COMANDO PARA CRIAR AS TABELAS
 #python criar_tabelas.py
